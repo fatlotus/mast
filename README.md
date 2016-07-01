@@ -1,5 +1,7 @@
 # Mast: a Math AST for Golang
 
+[![CircleCI](https://img.shields.io/circleci/project/fatlotus/mast.svg?maxAge=2592000)](https://circleci.com/gh/fatlotus/mast) 
+
 Because Go does not support operator overloading, most numerical libraries are 
 messy to use. Mast is an attempt to write a domain-specific language for math,
 so that code can be written in a more simple way.
