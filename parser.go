@@ -28,6 +28,7 @@ var PEMDAS Parser = Parser{
 		{"{", "}"},
 	},
 	Operators: []Prec{
+		{[]string{","}, InfixLeft},
 		{[]string{"+", "-"}, InfixLeft},
 		{[]string{"*", "/", "\\"}, InfixLeft},
 		{[]string{"^"}, InfixRight},

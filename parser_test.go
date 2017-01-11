@@ -26,6 +26,7 @@ var succeed = []struct {
 	{PEMDAS, "x = sin theta + z", "x = ((sin theta) + z)"},
 	{PEMDAS, "x = sin A^H", "x = ((sin A) ^ H)"},
 	{PEMDAS, "x = log a b c", "x = (((log a) b) c)"},
+	{PEMDAS, "q, r = QR c", "(q , r) = (QR c)"},
 }
 
 func TestParse(t *testing.T) {
