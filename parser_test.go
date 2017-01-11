@@ -25,17 +25,18 @@ var succeed = []struct {
 	{PEMDAS, "x=inv(A) * b", "x = ((inv A) * b)"},
 	{PEMDAS, "x = sin theta + z", "x = ((sin theta) + z)"},
 	{PEMDAS, "x = sin A^H", "x = ((sin A) ^ H)"},
+	{PEMDAS, "x = log a b c", "x = (((log a) b) c)"},
 }
 
 func TestParse(t *testing.T) {
 	for _, test := range succeed {
 		tree, err := test.Parser.Parse(test.Source)
 		if err != nil {
-			t.Logf("%s, while parsing %#v", err, test.Source)
+			t.Errorf("%s, while parsing %#v", err, test.Source)
 			continue
 		}
 		if tree.String() != test.Rep {
-			t.Logf("parsing %s\ngot       %#v;\nexpecting %#v",
+			t.Errorf("parsing %s\ngot       %#v;\nexpecting %#v",
 				test.Source, tree.String(), test.Rep)
 			continue
 		}

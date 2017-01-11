@@ -202,27 +202,35 @@ func (u Unexpected) Error() string {
 
 }
 
-func (p Parser) parseSingle(tokens []string) (lo []string, e Expr, err error) {
+func (p Parser) parseSingle(tokens []string, inApp bool) (lo []string, e Expr, err error) {
 	// Look for a single variable
 	if isVar(tokens[0]) {
 		lo = tokens[1:]
 		e = &Var{tokens[0]}
 		var e2 Expr
 
-		apply := false
-		for _, group := range p.Groups {
-			if lo[0] == group.Left {
-				apply = true
-				break
-			}
+		if inApp {
+			return
 		}
 
-		if apply || (isVar(lo[0]) && p.AdjacentIsApplication) {
-			lo, e2, err = p.parseSingle(lo)
-			if err != nil {
-				return
+		for {
+			apply := false
+			for _, group := range p.Groups {
+				if lo[0] == group.Left {
+					apply = true
+					break
+				}
 			}
-			e = &Apply{e, e2}
+
+			if apply || (isVar(lo[0]) && p.AdjacentIsApplication) {
+				lo, e2, err = p.parseSingle(lo, true)
+				if err != nil {
+					return
+				}
+				e = &Apply{e, e2}
+			} else {
+				break
+			}
 		}
 		return
 	}
@@ -256,7 +264,7 @@ func (p Parser) parseSingle(tokens []string) (lo []string, e Expr, err error) {
 
 func (p Parser) parseExpr(prec int, tokens []string) (lo []string, e Expr, err error) {
 	if prec >= len(p.Operators) {
-		return p.parseSingle(tokens)
+		return p.parseSingle(tokens, false)
 	}
 
 	var e2 Expr
