@@ -11,6 +11,7 @@ func isWsp(r rune) bool {
 type runePred func(rune) bool
 
 var tokenPreds = []runePred{
+	unicode.IsUpper,
 	unicode.IsLetter,
 	isWsp,
 }
@@ -29,9 +30,13 @@ func (p Parser) tokenize(code string) ([]string, error) {
 			}
 
 			st = nil
-			for _, pred := range tokenPreds {
+			for i, pred := range tokenPreds {
 				if pred(c) {
-					st = pred
+					if i == 0 { // upper case letter
+						st = nil
+					} else {
+						st = pred
+					}
 					break
 				}
 			}

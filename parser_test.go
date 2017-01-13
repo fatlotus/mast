@@ -19,14 +19,16 @@ var succeed = []struct {
 	{PEMDAS, "x=a''", "x = (' (' a))"},
 	{PEMDAS, "r=a++++b", "r = (a + (+ (+ (+ b))))"},
 	{PEMDAS, "r=a^b^c^d", "r = (a ^ (b ^ (c ^ d)))"},
-	{PEMDAS, "r=Ax-b", "r = (Ax - b)"},
+	{PEMDAS, "r=Ax-b", "r = ((A x) - b)"},
+	{PEMDAS, "r=xA-b", "r = (xA - b)"},
+	{PEMDAS, "r=ABC", "r = ((A B) C)"},
 	{PEMDAS, "err=trans * next - initial", "err = ((trans * next) - initial)"},
 	{PEMDAS, "r={([a+b])*c}", "r = ((a + b) * c)"},
 	{PEMDAS, "x=inv(A) * b", "x = ((inv A) * b)"},
 	{PEMDAS, "x = sin theta + z", "x = ((sin theta) + z)"},
 	{PEMDAS, "x = sin A^H", "x = ((sin A) ^ H)"},
 	{PEMDAS, "x = log a b c", "x = (((log a) b) c)"},
-	{PEMDAS, "q, r = QR c", "(q , r) = (QR c)"},
+	{PEMDAS, "q, r = qr c", "(q , r) = (qr c)"},
 }
 
 func TestParse(t *testing.T) {
