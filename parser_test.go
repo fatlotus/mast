@@ -29,6 +29,7 @@ var succeed = []struct {
 	{PEMDAS, "x = sin A^H", "x = ((sin A) ^ H)"},
 	{PEMDAS, "x = log a b c", "x = (((log a) b) c)"},
 	{PEMDAS, "q, r = qr c", "(q , r) = (qr c)"},
+	{PEMDAS, "x = 42", "x = 42"},
 }
 
 func TestParse(t *testing.T) {

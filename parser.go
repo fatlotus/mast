@@ -158,7 +158,7 @@ func (e *Equation) String() string {
 
 func isVar(s string) bool {
 	for _, c := range s {
-		if !unicode.IsLetter(c) {
+		if !unicode.IsLetter(c) && !unicode.IsDigit(c) {
 			return false
 		}
 	}

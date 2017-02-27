@@ -13,6 +13,7 @@ type runePred func(rune) bool
 var tokenPreds = []runePred{
 	unicode.IsUpper,
 	unicode.IsLetter,
+	unicode.IsDigit,
 	isWsp,
 }
 
