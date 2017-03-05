@@ -12,8 +12,18 @@ type Parser struct {
 	// probably come before multiplication/division).
 	Operators []Prec
 
-	// Define which matching grouping operators are used.
-	Groups []Group
+	// Define the invisible grouping operators. These are not part of the tree,
+	// but do override order of operations [as in (a + b) * c].
+	Parens []Group
+
+	// Define structural grouping operators. These behave like parens, except
+	// they also also empty groups, and turn into Unary and Var nodes.
+	//
+	// Examples:
+	//   []     = Var{"[]"}
+	//   [x]    = Unary{"[]", Var{"x"}}
+	//   [a, b] = Unary{"[]", Binary{",", "a", "b"}}
+	Brackets []Group
 
 	// If true, then "sin x" is legal and parses as "sin(x)" would. If false,
 	// that is a syntax error.
@@ -22,9 +32,11 @@ type Parser struct {
 
 // PEMDAS defines a typical multiply-first math language.
 var PEMDAS Parser = Parser{
-	Groups: []Group{
+	Parens: []Group{
 		{"(", ")"},
 		{"[", "]"},
+	},
+	Brackets: []Group{
 		{"{", "}"},
 	},
 	Operators: []Prec{
@@ -194,13 +206,15 @@ type Unexpected struct {
 
 // Represent this Unexpected as a string.
 func (u Unexpected) Error() string {
-	switch u.Found {
-	case "":
-		return fmt.Sprintf("unexpected end-of-input, expecting %s", u.Expecting)
-	default:
-		return fmt.Sprintf("unexpected %#v, expecting %s", u.Found, u.Expecting)
+	found := u.Found
+	if found == "" {
+		found = "end-of-input"
 	}
-
+	result := fmt.Sprintf("unexpected %#v", u.Found)
+	if u.Expecting != "" {
+		result += fmt.Sprintf(", expecting %s", u.Expecting)
+	}
+	return result
 }
 
 func (p Parser) parseSingle(tokens []string, inApp bool) (lo []string, e Expr, err error) {
@@ -216,7 +230,7 @@ func (p Parser) parseSingle(tokens []string, inApp bool) (lo []string, e Expr, e
 
 		for {
 			apply := false
-			for _, group := range p.Groups {
+			for _, group := range append(p.Parens, p.Brackets...) {
 				if lo[0] == group.Left {
 					apply = true
 					break
@@ -237,13 +251,31 @@ func (p Parser) parseSingle(tokens []string, inApp bool) (lo []string, e Expr, e
 	}
 
 	// Look for an open parenthesis
-	for _, group := range p.Groups {
+	for _, group := range p.Parens {
 		if tokens[0] == group.Left {
 			lo, e, err = p.parseExpr(0, tokens[1:])
 			if lo[0] != group.Right {
 				return lo, nil, &Unexpected{lo[0], fmt.Sprintf("%#v", group.Right)}
 			}
 			lo = lo[1:]
+			return
+		}
+	}
+
+	// Look for an open bracket
+	for _, group := range p.Brackets {
+		if tokens[0] == group.Left {
+			if len(tokens) > 1 && tokens[1] == group.Right {
+				lo = tokens[2:]
+				e = &Var{group.Left + group.Right}
+				return
+			}
+			lo, e, err = p.parseExpr(0, tokens[1:])
+			if lo[0] != group.Right {
+				return lo, nil, &Unexpected{lo[0], fmt.Sprintf("%#v", group.Right)}
+			}
+			lo = lo[1:]
+			e = &Unary{group.Left + group.Right, e}
 			return
 		}
 	}
