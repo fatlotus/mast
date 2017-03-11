@@ -2,6 +2,7 @@ package mast_test
 
 import (
 	. "github.com/fatlotus/mast"
+	"strings"
 	"testing"
 )
 
@@ -45,6 +46,23 @@ func TestParse(t *testing.T) {
 		if tree.String() != test.Rep {
 			t.Errorf("parsing %s\ngot       %#v;\nexpecting %#v",
 				test.Source, tree.String(), test.Rep)
+			continue
+		}
+	}
+}
+
+func TestParseExpr(t *testing.T) {
+	for _, test := range succeed {
+		source := strings.SplitN(test.Source, "=", 2)[1]
+		tree, err := test.Parser.ParseExpr(source)
+		if err != nil {
+			t.Errorf("%s, while parsing %#v", err, source)
+			continue
+		}
+		rep := strings.TrimSpace(strings.SplitN(test.Rep, "=", 2)[1])
+		if tree.String() != rep {
+			t.Errorf("parsing %s\ngot       %#v;\nexpecting %#v",
+				source, tree.String(), rep)
 			continue
 		}
 	}

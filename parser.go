@@ -378,6 +378,22 @@ func (p Parser) parseEqn(tokens []string) (lo []string, r *Equation, err error) 
 	return lo, &Equation{lhs, rhs}, nil
 }
 
+// Parses an expression from source. On success, Expr is an expression; iff not,
+// error is non-nil and of type Unexpected{}
+func (p Parser) ParseExpr(source string) (Expr, error) {
+	tokens, err := p.tokenize(source)
+	if err != nil {
+		return nil, err
+	}
+	lo, e, err := p.parseExpr(0, tokens)
+	if err != nil {
+		return nil, err
+	} else if len(lo) > 1 || lo[0] != "" {
+		return nil, &Unexpected{lo[0], "end-of-input"}
+	}
+	return e, nil
+}
+
 // Parses a single equation in the given source. On success, Equation is a
 // parsed Equation; iff not, error is non-nil and of type Unexpected{}.
 func (p Parser) Parse(source string) (*Equation, error) {
